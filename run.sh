@@ -5,6 +5,11 @@ basedir=/data/DCEGLeiSongData/Kevin/
 cd $basedir
 
 #split
+if [ -d splited ]
+then 
+  rm -r splited
+fi
+
 if [ ! -d splited ]
 then
   mkdir -p splited
