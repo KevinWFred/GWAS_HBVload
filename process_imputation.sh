@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-#code used to process imputed genotype for REVEAL GWAS project
+#code used to process imputed genotype for HBVload GWAS project
+#it QCs the genotype (1.MAF>=0.5, and 2. HWE p-value<1E-6) and generates the genotype (dosage) data.
 
 module load plink/1.9
 
@@ -29,6 +30,7 @@ filtering(){
   #plink --vcf $vcffile  --maf 0.05 --hwe 0.000001 --geno 0.05 --make-bed --out tmp_s1_$chr --memory 6400
   plink --vcf $vcffile  --maf 0.05 --hwe 0.000001 --make-bed --out tmp_s1_$chr --memory 6400 
   plink --bfile tmp_s1_$chr --qual-scores $infofile1 7 1 1 --qual-threshold 0.3 --make-bed --out "$prefix" --memory 6400
+  
   #If binary merging fails because at least one variant would have more than two alleles, a list of offending variant(s) will be written to plink.missnp.multi-allelic
   #plink --bfile tmp_s1_$chr  --bmerge tmp_s1_$chr --merge-mode 6 --out tmp_$chr   --memory 6400
   #if [[ -f tmp_$chr.missnp ]];then
@@ -39,17 +41,15 @@ filtering(){
   #plink --bfile tmp_s1_$chr  --exclude tmp_$chr.dupvar --make-bed --out tmp_s2_$chr --memory 6400
   #plink --bfile tmp_s2_$chr  --maf 0.05 --biallelic-only strict --snps-only --hwe 0.00001 --geno 0.05 --qual-scores $infofile1 7 1 1 --qual-threshold 0.3 --make-bed --out $prefix --memory 6400
   #filter samples
-  #plink --bfile $prefix --make-bed --keep /data/DCEGLeiSongData/Kevin/data/samples.txt --out "$prefix" --memory 6400
+  plink --bfile $prefix --make-bed --keep /data/DCEGLeiSongData/Kevin/data/samples.txt --out "$prefix" --memory 6400
   #create dosage
   #plink --bfile $prefix --recode A-transpose --out "$prefix" --memory 6400
 
   rm $infofile1
-  rm tmp_s*_$chr.bed
-  rm tmp_s*_$chr.bim
-  rm tmp_s*_$chr.fam
-  rm tmp_s*_$chr.nosex
- 
-  
+  #rm tmp_s*_$chr.bed
+  #rm tmp_s*_$chr.bim
+  #rm tmp_s*_$chr.fam
+  #rm tmp_s*_$chr.nosex 
 }
 for chr in {1..22}
 do
@@ -63,5 +63,6 @@ do
 echo chr${chr}_filter>> mergelist.txt
 done
 plink --merge-list mergelist.txt --make-bed --out processed --memory 6400
+#create dosage
 plink --bfile processed --recode A-transpose --out processed --memory 6400
 

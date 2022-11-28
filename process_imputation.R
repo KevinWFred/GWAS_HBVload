@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-#generate phenotype data used for GWAS
+#generate phenotype data used for ordinal.lr.R
 setwd("/data/DCEGLeiSongData/Kevin/code")
 pheno = read.table("../data/ana_final_VL_new.csv",sep=",",header=T)
 

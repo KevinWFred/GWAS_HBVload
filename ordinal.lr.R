@@ -1,9 +1,16 @@
+#!/usr/bin/env Rscript
+# the code includes a function to compute p-value, odds radio, MAF, etc for each snp.
+# It needs two inputs: file names of genotype data (contains multiple SNPs) and output. 
+# An example to call the function: 
+#   ordinal.lr(snp.traw.file = /data/DCEGLeiSongData/Kevin/splited/processed.traw__1.gz, out.file = /data/DCEGLeiSongData/Kevin/result/processed.traw__1.txt)
+# The output is a text file (defined by out.file). Each line represents results for a SNP.
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)!=2) stop("Two inputs are required: file names of genotype and output")
 SNP_TRAW_FILE = args[1]
 OUT_FILE = args[2]
-ordinal.lr <- function(snp.traw.file = "/data/DCEGLeiSongData/Kevin/splited/processed.traw__1.gz",  pheno.Rdata.file = "/data/DCEGLeiSongData/Kevin/result/pheno.RData", out.file = "/data/DCEGLeiSongData/Kevin/result/processed.traw__1.txt"){
-	# browser()
+ordinal.lr <- function(snp.traw.file = "/data/DCEGLeiSongData/Kevin/splited/processed.traw__1.gz", out.file = "/data/DCEGLeiSongData/Kevin/result/processed.traw__1.txt"){
+	# load phenotype file
+	pheno.Rdata.file = "/data/DCEGLeiSongData/Kevin/result/pheno.RData"
 	load(pheno.Rdata.file)
 	
 	snp.traw = read.delim(file = snp.traw.file, header = TRUE, check.names = FALSE, stringsAsFactors = FALSE)
