@@ -10,7 +10,7 @@ SNP_TRAW_FILE = args[1]
 OUT_FILE = args[2]
 ordinal.lr <- function(snp.traw.file = "/data/DCEGLeiSongData/Kevin/splited/processed.traw__1.gz", out.file = "/data/DCEGLeiSongData/Kevin/result/processed.traw__1.txt"){
 	# load phenotype file
-	pheno.Rdata.file = "/data/DCEGLeiSongData/Kevin/result/pheno.RData"
+	pheno.Rdata.file = "/data/DCEGLeiSongData/Kevin/HBVloadGwas/result/pheno.RData"
 	load(pheno.Rdata.file)
 	
 	snp.traw = read.delim(file = snp.traw.file, header = TRUE, check.names = FALSE, stringsAsFactors = FALSE)
