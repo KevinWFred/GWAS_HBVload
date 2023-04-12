@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #to split genomewied genotype into multiple jobs (each job has 10000 SNPs) and submit
 
-basedir=/data/DCEGLeiSongData/Kevin/
+basedir=/data/DCEGLeiSongData/Kevin/HBVloadGwas/
 cd $basedir
 
 #split

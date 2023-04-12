@@ -7,7 +7,7 @@ module load plink/1.9
 #https://si.biostat.washington.edu/sites/default/files/modules/RecommendedReading_Session6.pdf , HRC doesn't include indels
 
 #folder contains imputed data
-infolder=/data/DCEGLeiSongData/Kevin/TOPMed_Imputation/
+infolder=/data/DCEGLeiSongData/Kevin/HBVloadGwas/TOPMed_Imputation/
 outfolder="$infolder"processed/
 mkdir -p $outfolder
 
