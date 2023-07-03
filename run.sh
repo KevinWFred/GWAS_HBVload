@@ -46,3 +46,17 @@ mkdir -p ${basedir}logs
 cd ${basedir}logs
 
 swarm -f ${basedir}code/run.swarm -g 16 --module R/4.2.0 --time=10:00:00
+
+#For HBeAg negative samples
+rscript="/data/BB_Bioinformatics/Kevin/HBV_GWAS/code/ordinal.lr.R"
+splited_file_dir="/data/DCEGLeiSongData/Kevin/HBVloadGwas/splited"
+out_dir="/data/BB_Bioinformatics/Kevin/HBV_GWAS/result/ordinal_hbeag_neg"
+
+ls --color=never $splited_file_dir/*.gz | sort -V | while read ifile
+do
+  ofile=`basename $ifile | sed 's/.gz/.txt/g' -`
+  printf "Rscript $rscript $ifile ${out_dir}/$ofile negative \n" >> run_hbeag_neg.swarm
+  echo $ifile
+  echo $ofile
+done
+swarm -f /data/BB_Bioinformatics/Kevin/HBV_GWAS/code/run_hbeag_neg.swarm -g 16 --module R/4.2.0 --time=12:00:00

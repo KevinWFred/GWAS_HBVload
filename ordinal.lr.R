@@ -5,10 +5,16 @@
 #   ordinal.lr(snp.traw.file = /data/DCEGLeiSongData/Kevin/splited/processed.traw__1.gz, out.file = /data/DCEGLeiSongData/Kevin/result/processed.traw__1.txt)
 # The output is a text file (defined by out.file). Each line represents results for a SNP.
 args = commandArgs(trailingOnly=TRUE)
-if (length(args)!=2) stop("Two inputs are required: file names of genotype and output")
+#if (length(args)!=2) stop("Two inputs are required: file names of genotype and output")
 SNP_TRAW_FILE = args[1]
 OUT_FILE = args[2]
-ordinal.lr <- function(snp.traw.file = "/data/DCEGLeiSongData/Kevin/splited/processed.traw__1.gz", out.file = "/data/DCEGLeiSongData/Kevin/result/processed.traw__1.txt"){
+hbeag="all"
+if(length(args)==3)
+  hbeag = args[3]
+setwd("/data/BB_Bioinformatics/Kevin/HBV_GWAS/code")
+
+ordinal.lr <- function(snp.traw.file = "/data/DCEGLeiSongData/Kevin/HBVloadGwas/splited/processed.traw__1.gz", out.file = "/data/DCEGLeiSongData/Kevin/result/processed.traw__1.txt",
+                       HBeAg="all"){
 	# load phenotype file
 	pheno.Rdata.file = "/data/DCEGLeiSongData/Kevin/HBVloadGwas/result/pheno.RData"
 	load(pheno.Rdata.file)
@@ -17,7 +23,9 @@ ordinal.lr <- function(snp.traw.file = "/data/DCEGLeiSongData/Kevin/splited/proc
 	# CHR     SNP     (C)M    POS     COUNTED ALT     1000_CHB.AxiomGT1_1000_CHB.AxiomGT1
 	snp.info = snp.traw[, c("CHR", "SNP", "POS", "COUNTED", "ALT")]
 	colnames(snp.info) = c("CHR", "SNP", "BP", "EFF", "REF")
-	
+	# bim=as.data.frame(fread("/data/DCEGLeiSongData/Kevin/HBVloadGwas/TOPMed_Imputation/processed/processed.bim"))
+	# idx=match(snp.info$SNP,bim$V2)
+	# table(snp.info$EFF==bim$V5[idx])
 	snp.data = snp.traw[, -(1:6)]
 	col.names = gsub("^0_","",colnames(snp.data))
 	
@@ -25,8 +33,9 @@ ordinal.lr <- function(snp.traw.file = "/data/DCEGLeiSongData/Kevin/splited/proc
 	idx = match(rownames(pheno), col.names)
 	snp.data = t(snp.data[, idx])
 	colnames(snp.data) = snp.info$SNP
-	
-	# if (!require("MASS",character.only = TRUE)){
+	HBeAgtable=read.table("../result/sero_hbeag_pheno.txt",header=T)
+	HBeAgtable=HBeAgtable[HBeAgtable$seroclearance %in% c(1,2),]
+	# if t(!require("MASS",character.only = TRUE)){
 	# 	install.packages("MASS", repos='http://cran.us.r-project.org')
 	# }
 	library(MASS)
@@ -43,7 +52,10 @@ ordinal.lr <- function(snp.traw.file = "/data/DCEGLeiSongData/Kevin/splited/proc
 	for(i in 1:ncol(snp.data)){
 	 # for(i in 1:100){
 		cur.data = data.frame(SNP = snp.data[, i], pheno, check.names = FALSE, stringsAsFactors = FALSE)
-		
+		if (HBeAg=="negative") #HBeAg negative
+		{
+		  cur.data=cur.data[rownames(cur.data) %in% HBeAgtable$IID,]
+		}
 		idx.cases = cur.data$HBVDNA.grp != 1
 		x = cur.data[idx.cases, "SNP"]
 		res[i, "MAF.cases"] = sum(x, na.rm = TRUE)/(2*sum(!is.na(x)))
@@ -95,7 +107,7 @@ ordinal.lr <- function(snp.traw.file = "/data/DCEGLeiSongData/Kevin/splited/proc
 
 }
 
-ordinal.lr(snp.traw.file = SNP_TRAW_FILE, out.file = OUT_FILE)
+ordinal.lr(snp.traw.file = SNP_TRAW_FILE, out.file = OUT_FILE, HBeAg =hbeag)
 
 
 

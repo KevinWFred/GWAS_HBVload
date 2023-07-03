@@ -55,7 +55,7 @@ for (i in 1:22)
 
 #save(allinfo,allres,file="../result/info_res.RData")
 load("../result/info_res.RData")
-
+write.table(allres,file="../result/ordinal_lr_result.txt",row.names = F,sep="\t",quote=F)
 sum(allinfo$MAF>0.05)
 
 sum(allinfo$Rsq>0.3)
@@ -697,3 +697,5 @@ idx1=match(malesamples,colnames(tmp))
 maledat=cbind(tmp[,1:6],tmp[,idx1])
 idx1=match(femalesamples,colnames(tmp))
 femaledat=cbind(tmp[,1:6],tmp[,idx1])
+
+

@@ -7,7 +7,7 @@ seroclearance=read.csv("../data/id_seroclearance.csv")
 pheno.Rdata.file = "/data/DCEGLeiSongData/Kevin/HBVloadGwas/result/pheno.RData"
 load(pheno.Rdata.file)
 idx=match(rownames(pheno),seroclearance$id_new)
-pheno$sero=seroclearance$HBsAg_seroclearance
+pheno$sero=seroclearance$HBsAg_seroclearance[idx]
 
 #form phenotype data
 tmp=data.frame(FID=0,IID=rownames(pheno),seroclearance=pheno$sero)
@@ -32,7 +32,7 @@ cmd=paste0(plink2," --bfile ",prefix," --keep ../result/sero_samples.txt --pheno
 system(cmd)
 tmp=read.table("../result/seroclearance.seroclearance.glm.logistic.hybrid")
 tmp=tmp[tmp$V8=="ADD",]
-cmd=paste0(plink2," --bfile ",prefix," --keep ../result/sero_samples.txt --pheno ../result/sero_pheno.txt --covar  ../result/sero_cov.txt --logistic no-firth --ci 0.95 --out ../result/seroclearance")
+cmd=paste0(plink2," --bfile ",prefix," --keep ../result/sero_samples.txt --pheno ../result/sero_pheno.txt --covar  ../result/sero_cov.txt --logistic no-firth hide-covar --ci 0.95 --out ../result/seroclearance")
 system(cmd)
 logistres=as.data.frame(fread("../result/seroclearance.seroclearance.glm.logistic"))
 logistres=logistres[logistres$TEST=="ADD",]
@@ -61,7 +61,7 @@ qqplot=function(pvalue=NULL,main="",xlim=NULL,ylim=NULL)
   
 }
 png("../result/sero_qqplot.png",res=100)
-qqplot(logistres$P) #1.002
+qqplot(logistres$P) #1.02
 dev.off()
 library(qqman)
 colnames(logistres)[1]="CHR"
@@ -76,7 +76,7 @@ all_snps <- SNPlocs.Hsapiens.dbSNP155.GRCh38
 seqlevelsStyle(genome) <- "NCBI"
 
 ## construct a GPos object containing all the positions we're interested in
-positions <- GPos(seqnames = logistres$`#CHROM`, pos = logistres$POS)
+positions <- GPos(seqnames = logistres$CHR, pos = logistres$POS)
 
 ## query the genome with positions
 my_snps <- snpsByOverlaps(all_snps, positions, genome = genome)
@@ -84,9 +84,15 @@ my_snps <- snpsByOverlaps(all_snps, positions, genome = genome)
 ## this gives us a GPos object
 my_snps = as.data.frame(my_snps)
 
-idx = match(paste0(logistres$`#CHROM`,":",logistres$POS),paste0(my_snps$seqnames,":",my_snps$pos))
+idx = match(paste0(logistres$CHR,":",logistres$POS),paste0(my_snps$seqnames,":",my_snps$pos))
 logistres$rsid=my_snps$RefSNP_id[idx]
-
+logistres$a1=logistres$ALT
+logistres$a2=logistres$REF
+idx=which(logistres$A1==logistres$REF)
+logistres$a1[idx]=logistres$REF[idx]
+logistres$a2[idx]=logistres$ALT[idx]
+tmp=logistres[,c(3,16,1,2,17,18,9,10,14)]
+write.csv(tmp,file="../result/HBsAg_seroclearance_sumstat.csv",row.names = F,quote=F)
 load("/data/DCEGLeiSongData/Kevin/HBVloadGwas/result/refgeneshg38codinggenes.RData")
 topsnps=logistres[logistres$P<5e-5,]
 colnames(topsnps)[1:2]=c("CHR","BP")
@@ -120,17 +126,19 @@ head(topsnps)
 tmp=data.frame(topsnps[,c(3,16,1,2,4,5,9,10,14,17,18,19)])
 tmp=tmp[order(tmp$P),]
 write.csv(tmp,file="../result/seroclearance_topsnps.csv",row.names = F)
-
+tmp1=read.csv("../result/seroclearance_topsnps.csv")
 # on HBeAg negative samples-----------------
 seroclearance=read.csv("../data/id_seroclearance.csv")
 pheno.Rdata.file = "/data/DCEGLeiSongData/Kevin/HBVloadGwas/result/pheno.RData"
 load(pheno.Rdata.file)
 idx=match(rownames(pheno),seroclearance$id_new)
-pheno$sero=seroclearance$HBsAg_seroclearance
+pheno$sero=seroclearance$HBsAg_seroclearance[idx]
 hbeagdat=read.csv("../data/GLMdata.csv")
 tmp=hbeagdat$id_new[hbeagdat$hbeag==0]
 idx=match(rownames(pheno),hbeagdat$id_new)
+all(rownames(pheno)==hbeagdat$id_new[idx])
 pheno$bheag=hbeagdat$hbeag[idx]
+table(pheno$sero,pheno$bheag,useNA="ifany")
 pheno=pheno[pheno$bheag==0,]
 
 #form phenotype data
@@ -176,7 +184,7 @@ qqplot=function(pvalue=NULL,main="",xlim=NULL,ylim=NULL)
   
 }
 png("../result/sero_hbeag_qqplot.png",res=100)
-qqplot(logistres$P) #1.01
+qqplot(logistres$P) #1.02
 dev.off()
 library(qqman)
 colnames(logistres)[1]="CHR"
@@ -201,7 +209,13 @@ my_snps = as.data.frame(my_snps)
 
 idx = match(paste0(logistres$CHR,":",logistres$POS),paste0(my_snps$seqnames,":",my_snps$pos))
 logistres$rsid=my_snps$RefSNP_id[idx]
-
+logistres$a1=logistres$ALT
+logistres$a2=logistres$REF
+idx=which(logistres$A1==logistres$REF)
+logistres$a1[idx]=logistres$REF[idx]
+logistres$a2[idx]=logistres$ALT[idx]
+tmp=logistres[,c(3,16,1,2,17,18,9,10,14)]
+write.csv(tmp,file="../result/HBsAg_seroclearance_HBeAg_negative_sumstat.csv",row.names = F,quote=F)
 load("/data/DCEGLeiSongData/Kevin/HBVloadGwas/result/refgeneshg38codinggenes.RData")
 topsnps=logistres[logistres$P<5e-5,]
 colnames(topsnps)[1:2]=c("CHR","BP")
@@ -235,3 +249,4 @@ head(topsnps)
 tmp=data.frame(topsnps[,c(3,16,1,2,4,5,9,10,14,17,18,19)])
 tmp=tmp[order(tmp$P),]
 write.csv(tmp,file="../result/seroclearance_hbeag_topsnps.csv",row.names = F)
+tmp1=as.data.frame(fread("../result/seroclearance_hbeag_topsnps.csv"))

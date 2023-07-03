@@ -122,4 +122,43 @@ allres$Genotyped=allinfo$Genotyped[idx]
 allres$Beta=log(allres$OR)
 allres1=allres[,c("SNP","rsid","CHR","BP","EFF","REF","Beta","SE","P","Genotyped")]
 allres1$Genotyped=1-as.numeric(allres1$Genotyped)
-fwrite(allres1,file="../result/sumstat.cvs",row.names = F)
+fwrite(allres1,file="../result/sumstat.cvs",row.names = F) # HBV_GWAS_sumstat.csv in BOX
+
+#work on GWAS with HBeAg negative
+resultfolder = "../result/ordinal_hbeag_neg/"
+allfiles = list.files(resultfolder,pattern = "processed.*.txt")
+alljobs = unlist(strsplit(allfiles,"__"))
+alljobs = alljobs[seq(2,length(alljobs),2)]
+alljobs = unlist(strsplit(alljobs,".",fixed=T))
+alljobs = as.numeric(alljobs[seq(1,length(alljobs),2)])
+if (length(unique(alljobs))!=max(alljobs)) warning("Some results are missing")
+
+allres = NULL
+i=1
+for (myfile in paste0(resultfolder,allfiles))
+{
+  if (i %% 100==0) cat(i,'..')
+  tmp = fread(myfile,header = T)
+  allres = rbind(allres,tmp)
+  i = i+1
+}
+
+idx = order(allres$CHR,allres$BP)
+allres = allres[idx,]
+
+genome <- BSgenome.Hsapiens.UCSC.hg38
+seqlevelsStyle(genome) <- "NCBI"
+positions <- GPos(seqnames = allres$CHR, pos = allres$BP)
+
+## query the genome with out positions
+my_snps <- snpsByOverlaps(all_snps, positions, genome = genome)
+my_snps = as.data.frame(my_snps)
+tmp1=paste0(allres$CHR,"_",allres$BP)
+tmp2=paste0(my_snps$seqnames,"_",my_snps$pos)
+idx = match(tmp1,tmp2)
+allres$rsid=my_snps$RefSNP_id[idx]
+allres$Beta=log(allres$OR)
+allres1=allres[,c("SNP","rsid","CHR","BP","EFF","REF","Beta","SE","P")]
+fwrite(allres1,file="../result/HBV_HBeAg_negativeGWAS_sumstat.csv",row.names = F) 
+tmp=as.data.frame(fread("../result/sumstat.cvs",sep=","))
+all(tmp$SNP==allres1$SNP)
