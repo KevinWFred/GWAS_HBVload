@@ -4,7 +4,7 @@
 setwd("/data/DCEGLeiSongData/Kevin/HBVloadGwas/code")
 library(data.table)
 
-resultfolder = "/data/DCEGLeiSongData/Kevin/result/"
+resultfolder = "/data/DCEGLeiSongData/Kevin/HBVloadGwas/result/"
 allfiles = list.files(resultfolder,pattern = "processed.*.txt")
 alljobs = unlist(strsplit(allfiles,"__"))
 alljobs = alljobs[seq(2,length(alljobs),2)]
@@ -36,7 +36,7 @@ sig_res=allres[idx,]
 
 
 #check info
-impfolder = "/data/DCEGLeiSongData/Kevin/TOPMed_Imputation/"
+impfolder = "/data/DCEGLeiSongData/Kevin/HBVloadGwas/TOPMed_Imputation/"
 allinfo = NULL
 for (i in 1:22)
 {
@@ -47,7 +47,7 @@ for (i in 1:22)
   # tmp1 = tmp[tmp$MAF>0.05 & tmp$Rsq>0.3,]
   # tmp2 = unlist(strsplit(tmp1$SNP,":"))
   # tmp1$BP = tmp2[seq(2,length(tmp2),4)]
-  tmp = tmp[,c(5,7,8)]
+  tmp = tmp[,c(1,5,7,8)]
   tmp$Genotyped[which(tmp$Genotyped=="Imputed")]=1
   tmp$Genotyped[which(tmp$Genotyped=="Genotyped")]=0
   allinfo = rbind(allinfo,tmp)

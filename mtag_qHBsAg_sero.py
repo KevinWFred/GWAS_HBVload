@@ -58,5 +58,5 @@ idx=(qHBsAg1["a2"].isin(["A","T","G","C"])) & (qHBsAg1["a1"].isin(["A","T","G","
 idx.value_counts()
 qHBsAg1.loc[idx,].to_csv("../result/qHBsAg_mtag.txt",index=False,sep="\t")
 
-cmd=["/data/BB_Bioinformatics/Kevin/tools/mtag/mtag.py --sumstats ../result/serosum_mtag.txt,../result/qHBsAg_mtag.txt  --force --out ../result/mtag_qHBsAg_sero --n_min 0.0  --stream_stdout"]
+cmd=["/data/BB_Bioinformatics/Kevin/tools/mtag/mtag.py --ld_ref_panel /data/BB_Bioinformatics/Kevin/tools/LDSC/1000G_EAS_Phase3/ --sumstats ../result/serosum_mtag.txt,../result/qHBsAg_mtag.txt  --force --out ../result/mtag_qHBsAg_sero --n_min 0.0  --stream_stdout"]
 subprocess.call(cmd,shell=True)

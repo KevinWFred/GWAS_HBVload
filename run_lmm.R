@@ -8,6 +8,13 @@ tmp=data.frame(code=rep("/data/BB_Bioinformatics/Kevin/HBV_GWAS/code/lmm.R",leng
 write.table(tmp,file="log/lmm.swarm",row.names = F,col.names = F,sep=" ",quote=F)
 "swarm -f lmm.swarm -g 16 --module R/4.2.0 --time=2-10:00:00 --gres=lscratch:16"
 
+#to run it again use R4.3
+tmp=data.frame(code=rep("/data/BB_Bioinformatics/Kevin/HBV_GWAS/code/lmm.R",length(idxs)-1),nstart=idxs[-length(idxs)],nend=idxs[2:length(idxs)]-1,
+               outprefix=paste0("../result/lmm1/lmm",1:(length(idxs)-1)))
+write.table(tmp,file="log/lmm1.swarm",row.names = F,col.names = F,sep=" ",quote=F)
+#6705180
+"swarm -f lmm1.swarm -g 16 --module R --time=2-10:00:00 --gres=lscratch:16"
+
 tmp=data.frame(code=rep("/data/BB_Bioinformatics/Kevin/HBV_GWAS/code/lmm.R",length(idxs)-1),nstart=idxs[-length(idxs)],nend=idxs[2:length(idxs)]-1,
                outprefix=paste0("../result/lmm_hbeag_neg/lmm",1:(length(idxs)-1)),hbeag="negative")
 write.table(tmp,file="log/lmm_hbeag_neg.swarm",row.names = F,col.names = F,sep=" ",quote=F)
