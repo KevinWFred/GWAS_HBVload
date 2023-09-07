@@ -66,3 +66,26 @@ tmp1=fread("../result/HBsAg_seroclearance_mtag.csv")
 tmp2=fread("../result/HBsAg_seroclearance_MTAG.csv")
 plot(-log10(tmp1$mtag_pval),-log10(tmp2$mtag_pval))
 plot(tmp1$mtag_beta,tmp2$mtag_beta)
+
+hbeag_mtag=as.data.frame(fread("../result/mtag_hbvload_hbeag_trait_1.txt"))
+sum(hbeag_mtag$mtag_pval<5e-8) #13
+hbvload_mtag=as.data.frame(fread("../result/mtag_hbvload_hbeag_trait_2.txt"))
+sum(hbvload_mtag$mtag_pval<5e-8) #13
+write.table(hbeag_mtag[,c(1:5,9,10,12)],file="../result/HBeAg_mtag3.csv",row.names = F,quote=F)
+write.table(hbvload_mtag[,c(1:5,9,10,12)],file="../result/HBV_mtag3.csv",row.names = F,quote=F)
+
+hbeag_mtag=as.data.frame(fread("../result/mtag_hbvload_hbeag_qHBsAg_trait_2.txt"))
+sum(hbeag_mtag$mtag_pval<5e-8) #22
+hbvload_mtag=as.data.frame(fread("../result/mtag_hbvload_hbeag_qHBsAg_trait_1.txt"))
+sum(hbvload_mtag$mtag_pval<5e-8) #22
+qHBsAg_mtag=as.data.frame(fread("../result/mtag_hbvload_hbeag_qHBsAg_trait_3.txt"))
+sum(qHBsAg_mtag$mtag_pval<5e-8) #22
+write.table(hbeag_mtag[,c(1:5,9,10,12)],file="../result/HBeAg_mtag4.csv",row.names = F,quote=F)
+write.table(hbvload_mtag[,c(1:5,9,10,12)],file="../result/HBV_mtag4.csv",row.names = F,quote=F)
+write.table(qHBsAg_mtag[,c(1:5,9,10,12)],file="../result/qHBsAg_mtag4.csv",row.names = F,quote=F)
+hbvload=as.data.frame(fread("../result/sumstat.cvs"))
+sum(hbvload$P<5e-8) #17
+hbeag=as.data.frame(fread("../result/hbeag_sumstat.csv"))
+sum(hbeag$P<5e-8) #12
+qhbsag=as.data.frame(fread("../result/qHBsAg_sumstat.csv"))
+sum(qhbsag$P<5e-8)
