@@ -1,6 +1,7 @@
 #/usr/bin/env Rscript
+.libPaths(c("/data/wangx53",.libPaths()))
 library(data.table)
-plink="/usr/local/apps/plink/1.9/plink"
+plink="/usr/local/apps/plink/1.9.0-beta4.4/plink"
 plink2="/usr/local/apps/plink/2.3-alpha/plink2"
 
 pheno.Rdata.file = "/data/DCEGLeiSongData/Kevin/HBVloadGwas/result/pheno.RData"
@@ -21,15 +22,26 @@ write.table(tmp,file="../result/hbeag_pheno.txt",row.names = F,col.names = T,sep
 
 
 #Run GWAS
-prefix="/data/DCEGLeiSongData/Kevin/HBVloadGwas/TOPMed_Imputation/processed/processed"
-cmd=paste0(plink2," --bfile ",prefix,"  --pheno ../result/hbeag_pheno.txt --covar ../result/sero_cov.txt  --logistic hide-covar --ci 0.95 --out ../result/hbeag")
+prefix="/data/DCEGLeiSongData/Kevin/HBVloadGwas/TOPMed_Imputation/processed_new/processed"
+cmd=paste0(plink2," --bfile ",prefix,"  --pheno ../result/hbeag_pheno.txt --covar ../result/sero_cov.txt  --logistic hide-covar --ci 0.95 --out ../result/hbeag_maf01")
 system(cmd)
 
-cmd=paste0(plink2," --bfile ",prefix," --pheno ../result/hbeag_pheno.txt --covar  ../result/sero_cov.txt --logistic no-firth hide-covar --ci 0.95 --out ../result/hbeag")
+cmd=paste0(plink2," --bfile ",prefix," --pheno ../result/hbeag_pheno.txt --covar  ../result/sero_cov.txt --logistic no-firth hide-covar --ci 0.95 --out ../result/hbeag_maf01")
 system(cmd)
-logistres=as.data.frame(fread("../result/hbeag.hbeag.glm.logistic"))
-logistres=logistres[logistres$TEST=="ADD",]
-
+#logistres=as.data.frame(fread("../result/hbeag_maf01.bheag.glm.logistic.hybrid"))
+#logistres=logistres[logistres$TEST=="ADD",]
+logistres=as.data.frame(fread("../result/hbeag_maf01.bheag.glm.logistic"))
+oldlogistres=as.data.frame(fread("../result/hbeag.hbeag.glm.logistic"))
+allres=inner_join(oldlogistres,logistres,by="ID")
+table(allres$P.x==allres$P.y)
+addfreq=function(dat=logistres)
+{
+  freqdat=as.data.frame(fread("/data/DCEGLeiSongData/Kevin/HBVloadGwas/TOPMed_Imputation/processed_new/processed.frq"))
+  idx=match(dat$ID,freqdat$SNP)
+  dat$MAF=freqdat$MAF[idx]
+  return(dat)
+}
+logistres=addfreq()
 
 qqplot=function(pvalue=NULL,main="",xlim=NULL,ylim=NULL)
 {
@@ -45,12 +57,12 @@ qqplot=function(pvalue=NULL,main="",xlim=NULL,ylim=NULL)
   print(lambda)
   
 }
-png("../result/hbeag_qqplot.png",res=100)
+png("../result/hbeag_maf01_qqplot.png",res=100)
 qqplot(logistres$P) #1.05
 dev.off()
 library(qqman)
 colnames(logistres)[1]="CHR"
-png("../result/hbeag_manhattan.png",res=100, width=1200)
+png("../result/hbeag_maf01_manhattan.png",res=100, width=1200)
 manhattan(logistres, chr="CHR", bp="POS", snp="ID", p="P", suggestiveline = -log10(5e-6),col=c("navyblue", "springgreen3"),cex.axis=1.2,cex.lab=1.2)
 dev.off()
 
@@ -76,8 +88,16 @@ logistres$a2=logistres$REF
 idx=which(logistres$A1==logistres$REF)
 logistres$a1[idx]=logistres$REF[idx]
 logistres$a2[idx]=logistres$ALT[idx]
-tmp=logistres[,c(3,16,1,2,17,18,9,10,14)]
-write.csv(tmp,file="../result/hbeag_sumstat.csv",row.names = F,quote=F)
+#tmp=logistres[,c(3,16,1,2,17,18,9,10,14)]
+#tmp=logistres[,c(3,17,1,2,18,19,10,11,15)]
+tmp=logistres[,c(3,17,1,2,16,18,19,9,10,14)]
+colnames(tmp)[8]="BETA"
+tmp$BETA=log(tmp$BETA)
+colnames(tmp)[9]="SE"
+tmp$OR95=logistres$U95
+tmp$OR05=logistres$L95
+write.csv(tmp,file="../result/hbeag_maf01_sumstat.csv",row.names = F,quote=F)
+
 load("/data/DCEGLeiSongData/Kevin/HBVloadGwas/result/refgeneshg38codinggenes.RData")
 topsnps=logistres[logistres$P<5e-5,]
 colnames(topsnps)[1:2]=c("CHR","BP")
